@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#4a3608">
+  <title>Gestão financeira</title>
+  <link rel="stylesheet" href="static/estilo.css">
+  <script src="static/app.js" defer></script>
+</head>
+<body>
+  <main id="loginView" class="login-page">
+    <section class="login-box" aria-labelledby="loginTitle">
+      <a class="brand" href="index.html">Gestão</a>
+      <p class="eyebrow">Acesso administrativo</p>
+      <h1 id="loginTitle">Boas-vindas</h1>
+      <p id="loginMessage" class="login-message" role="alert" hidden></p>
+      <form id="loginForm">
+        <div class="field">
+          <label for="username">Usuário</label>
+          <input id="username" name="usuario" autocomplete="username" required>
+        </div>
+        <div class="field">
+          <label for="password">Senha</label>
+          <div class="password-control">
+            <input id="password" name="senha" type="password" autocomplete="current-password" required>
+            <button id="togglePassword" class="secondary password-toggle" type="button" aria-controls="password" aria-label="Mostrar senha" aria-pressed="false">Mostrar</button>
+          </div>
+        </div>
+        <button type="submit">Entrar</button>
+      </form>
+    </section>
+  </main>
+
+  <div id="appShell" hidden>
+    <header class="topbar">
+      <a class="brand" href="index.html">Gestão</a>
+      <nav class="navigation" aria-label="Navegação principal">
+        <button type="button" class="active" data-view="resumo" aria-current="page">Resumo</button>
+        <button type="button" data-view="vendas">Vendas e recebimentos</button>
+        <button type="button" data-view="despesas">Saídas</button>
+        <button type="button" data-view="compras">Lista de compras</button>
+        <button type="button" class="logout" id="logoutButton">Sair</button>
+      </nav>
+    </header>
+
+    <div id="toast" class="flash" role="status" aria-live="polite" hidden></div>
+
+    <main id="appView" class="container">
+      <section class="view" data-view-panel="resumo" aria-labelledby="summaryTitle">
+        <div class="page-heading">
+          <div>
+            <p class="eyebrow">Entradas, recebimentos e saídas</p>
+            <h1 id="summaryTitle">Resumo financeiro</h1>
+          </div>
+          <div class="field period-field">
+            <label for="summaryPeriod">Período do resumo</label>
+            <select id="summaryPeriod">
+              <option value="week">Esta semana</option>
+              <option value="month">Este mês</option>
+              <option value="year">Este ano</option>
+            </select>
+          </div>
+        </div>
+
+        <section class="summary-grid" aria-label="Totais do período">
+          <article class="summary-card"><span>Vendido</span><strong id="totalSales">R$ 0,00</strong></article>
+          <article class="summary-card"><span>Já recebeu</span><strong id="totalReceived">R$ 0,00</strong></article>
+          <article class="summary-card"><span>A receber</span><strong id="totalReceivable">R$ 0,00</strong></article>
+          <article class="summary-card"><span>Saídas</span><strong id="totalExpenses">R$ 0,00</strong></article>
+          <article class="summary-card highlight"><span>Saldo recebido</span><strong id="totalBalance">R$ 0,00</strong></article>
+        </section>
+
+        <section class="panel" aria-labelledby="weekdayTitle">
+          <h2 class="section-heading" id="weekdayTitle">Resumo por dia da semana</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Dia</th><th>Vendido</th><th>Recebido</th><th>A receber</th><th>Saídas</th><th>Saldo</th></tr></thead>
+              <tbody id="weekdaysBody"></tbody>
+            </table>
+          </div>
+          <p id="weekdaysEmpty" class="empty-state" hidden>Nenhum lançamento neste período. Registre uma venda ou saída para começar.</p>
+        </section>
+
+        <section class="panel" aria-labelledby="monthlyTitle">
+          <h2 class="section-heading" id="monthlyTitle">Balanço por mês</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Mês</th><th>Vendido</th><th>Recebido</th><th>A receber</th><th>Saídas</th><th>Saldo</th></tr></thead>
+              <tbody id="monthsBody"></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+
+      <section class="view" data-view-panel="vendas" aria-labelledby="salesTitle" hidden>
+        <div class="page-heading">
+          <div>
+            <p class="eyebrow">Anote a venda sem cadastrar clientes ou produtos</p>
+            <h1 id="salesTitle">Vendas e recebimentos</h1>
+          </div>
+        </div>
+        <section class="panel" aria-labelledby="newSaleTitle">
+          <h2 class="section-heading" id="newSaleTitle">Registrar venda</h2>
+          <form id="saleForm" class="form-grid sale-form">
+            <div class="field"><label for="saleItem">O que vendeu?</label><input id="saleItem" name="item" placeholder="Ex.: bolo de chocolate" required></div>
+            <div class="field"><label for="saleBuyer">Quem comprou?</label><input id="saleBuyer" name="comprador" placeholder="Nome ou apelido" required></div>
+            <div class="field"><label for="saleAmount">Valor da venda</label><input id="saleAmount" name="valor" inputmode="decimal" placeholder="Ex.: 45,00" required></div>
+            <div class="field"><label for="saleDate">Data</label><input id="saleDate" name="data" type="date" required></div>
+            <div class="field"><label for="saleStatus">Recebimento</label><select id="saleStatus" name="status"><option value="pendente">Ainda vai receber</option><option value="recebido">Já recebeu</option></select></div>
+            <button type="submit">Salvar venda</button>
+          </form>
+        </section>
+        <section class="panel" aria-labelledby="salesListTitle">
+          <h2 class="section-heading" id="salesListTitle">Vendas anotadas</h2>
+          <p id="salesEmpty" class="empty-state" hidden>As vendas e os valores que faltam receber aparecerão aqui.</p>
+          <div id="salesTableWrap" class="table-wrap">
+            <table>
+              <thead><tr><th>Data</th><th>O que vendeu</th><th>Quem comprou</th><th>Valor</th><th>Status</th><th>Ações</th></tr></thead>
+              <tbody id="salesBody"></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+
+      <section class="view" data-view-panel="despesas" aria-labelledby="expensesTitle" hidden>
+        <div class="page-heading">
+          <div><p class="eyebrow">Compras e outros gastos</p><h1 id="expensesTitle">Saídas</h1></div>
+        </div>
+        <section class="panel" aria-labelledby="newExpenseTitle">
+          <h2 class="section-heading" id="newExpenseTitle">Registrar saída</h2>
+          <form id="expenseForm" class="form-grid expense-form">
+            <div class="field"><label for="expenseDescription">O que comprou ou pagou?</label><input id="expenseDescription" name="descricao" placeholder="Ex.: ingredientes, embalagem, transporte" required></div>
+            <div class="field"><label for="expenseAmount">Valor</label><input id="expenseAmount" name="valor" inputmode="decimal" placeholder="Ex.: 25,00" required></div>
+            <div class="field"><label for="expenseDate">Data</label><input id="expenseDate" name="data" type="date" required></div>
+            <button type="submit">Salvar saída</button>
+          </form>
+        </section>
+        <section class="panel" aria-labelledby="expensesListTitle">
+          <h2 class="section-heading" id="expensesListTitle">Saídas anotadas</h2>
+          <p id="expensesEmpty" class="empty-state" hidden>As compras e outras saídas aparecerão aqui.</p>
+          <div id="expensesTableWrap" class="table-wrap">
+            <table>
+              <thead><tr><th>Data</th><th>Descrição</th><th>Valor</th><th>Ações</th></tr></thead>
+              <tbody id="expensesBody"></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+
+      <section class="view" data-view-panel="compras" aria-labelledby="shoppingTitle" hidden>
+        <div class="page-heading">
+          <div><p class="eyebrow">Lembretes, sem controle de estoque</p><h1 id="shoppingTitle">Lista do que comprar</h1></div>
+        </div>
+        <section class="panel" aria-labelledby="newShoppingItemTitle">
+          <h2 class="section-heading" id="newShoppingItemTitle">Adicionar lembrete</h2>
+          <form id="shoppingForm" class="form-grid shopping-form">
+            <div class="field"><label for="shoppingItem">O que precisa comprar de novo?</label><input id="shoppingItem" name="item" placeholder="Ex.: farinha, caixas para entrega" required></div>
+            <div class="field"><label for="shoppingNote">Observação (opcional)</label><input id="shoppingNote" name="observacao" placeholder="Ex.: comprar no mercado do bairro"></div>
+            <button type="submit">Adicionar à lista</button>
+          </form>
+        </section>
+        <section class="panel" aria-labelledby="shoppingListTitle">
+          <h2 class="section-heading" id="shoppingListTitle">Lembretes de compra</h2>
+          <p id="shoppingEmpty" class="empty-state">Adicione itens que quer lembrar de comprar. Esta lista não controla estoque.</p>
+          <ul id="shoppingList" class="shopping-list"></ul>
+        </section>
+      </section>
+    </main>
+  </div>
+</body>
+</html>
