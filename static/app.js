@@ -1,6 +1,4 @@
 (() => {
-  const USERNAME = 'admin';
-  const PASSWORD = 'admin123';
   const DATA_KEY = 'gestao.data.v1';
   const AUTH_KEY = 'gestao.authenticated';
   const currency = new Intl.NumberFormat('pt-BR', {
@@ -41,6 +39,13 @@
     shoppingForm: document.querySelector('#shoppingForm'),
     shoppingList: document.querySelector('#shoppingList'),
     shoppingEmpty: document.querySelector('#shoppingEmpty'),
+    debtorForm: document.querySelector('#debtorForm'),
+    debtorsBody: document.querySelector('#debtorsBody'),
+    debtorsEmpty: document.querySelector('#debtorsEmpty'),
+    debtorsTableWrap: document.querySelector('#debtorsTableWrap'),
+    openDebtsTotal: document.querySelector('#openDebtsTotal'),
+    overdueDebtsTotal: document.querySelector('#overdueDebtsTotal'),
+    debtorCount: document.querySelector('#debtorCount'),
   };
 
   let data = loadData();
@@ -54,9 +59,10 @@
         sales: Array.isArray(saved.sales) ? saved.sales : [],
         expenses: Array.isArray(saved.expenses) ? saved.expenses : [],
         shopping: Array.isArray(saved.shopping) ? saved.shopping : [],
+        debtors: Array.isArray(saved.debtors) ? saved.debtors : [],
       };
     } catch {
-      return { sales: [], expenses: [], shopping: [] };
+      return { sales: [], expenses: [], shopping: [], debtors: [] };
     }
   }
 
@@ -319,11 +325,74 @@
     }
   }
 
+  function renderDebtors() {
+    const pendingDebts = data.debtors.filter((debt) => debt.status !== 'pago');
+    const overdueDebts = pendingDebts.filter((debt) => debt.dueDate < todayString());
+    const peopleOwing = new Set(pendingDebts.map((debt) => debt.name.trim().toLocaleLowerCase('pt-BR')));
+    const openTotal = pendingDebts.reduce((total, debt) => total + debt.amount, 0);
+    const overdueTotal = overdueDebts.reduce((total, debt) => total + debt.amount, 0);
+
+    elements.openDebtsTotal.textContent = currency.format(openTotal);
+    elements.overdueDebtsTotal.textContent = currency.format(overdueTotal);
+    elements.debtorCount.textContent = String(peopleOwing.size);
+
+    const debts = [...data.debtors].sort((first, second) => {
+      if (first.status === 'pago' && second.status !== 'pago') return 1;
+      if (first.status !== 'pago' && second.status === 'pago') return -1;
+      return first.dueDate.localeCompare(second.dueDate);
+    });
+    elements.debtorsBody.replaceChildren();
+    elements.debtorsEmpty.hidden = debts.length > 0;
+    elements.debtorsTableWrap.hidden = debts.length === 0;
+
+    for (const debt of debts) {
+      const row = document.createElement('tr');
+      row.append(
+        makeCell(debt.name),
+        makeCell(debt.description),
+        makeCell(currency.format(debt.amount)),
+        makeCell(formatDate(debt.dueDate)),
+      );
+      const statusCell = document.createElement('td');
+      const status = document.createElement('span');
+      status.className = 'status';
+      status.textContent = debt.status === 'pago'
+        ? 'Pago'
+        : debt.dueDate < todayString() ? 'Vencido' : 'Em aberto';
+      statusCell.append(status);
+      row.append(statusCell);
+
+      const actionsCell = document.createElement('td');
+      const actions = document.createElement('div');
+      actions.className = 'actions';
+      if (debt.status !== 'pago') {
+        const paidButton = document.createElement('button');
+        paidButton.type = 'button';
+        paidButton.className = 'secondary';
+        paidButton.dataset.action = 'paid';
+        paidButton.dataset.id = debt.id;
+        paidButton.textContent = 'Marcar pago';
+        actions.append(paidButton);
+      }
+      const deleteButton = document.createElement('button');
+      deleteButton.type = 'button';
+      deleteButton.className = 'danger';
+      deleteButton.dataset.action = 'delete';
+      deleteButton.dataset.id = debt.id;
+      deleteButton.textContent = 'Excluir';
+      actions.append(deleteButton);
+      actionsCell.append(actions);
+      row.append(actionsCell);
+      elements.debtorsBody.append(row);
+    }
+  }
+
   function renderAll() {
     renderSummary();
     renderSales();
     renderExpenses();
     renderShopping();
+    renderDebtors();
   }
 
   elements.togglePassword.addEventListener('click', () => {
@@ -337,11 +406,11 @@
   elements.loginForm.addEventListener('submit', (event) => {
     event.preventDefault();
     const formData = new FormData(elements.loginForm);
-    const username = String(formData.get('usuario') || '').trim();
+    const email = String(formData.get('email') || '').trim();
     const password = String(formData.get('senha') || '');
 
-    if (username !== USERNAME || password !== PASSWORD) {
-      elements.loginMessage.textContent = 'Usuário ou senha inválidos.';
+    if (!email || !/^[0-9]{8}$/.test(password)) {
+      elements.loginMessage.textContent = 'Informe um e-mail válido e uma senha de 8 números.';
       elements.loginMessage.hidden = false;
       return;
     }
@@ -440,6 +509,27 @@
     showToast('Item adicionado à lista.');
   });
 
+  elements.debtorForm.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const formData = new FormData(elements.debtorForm);
+    const name = String(formData.get('nome') || '').trim();
+    const description = String(formData.get('descricao') || '').trim();
+    const amount = parseAmount(formData.get('valor'));
+    const dueDate = String(formData.get('vencimento') || '');
+    if (!name || !description || !dueDate || !Number.isFinite(amount) || amount <= 0) {
+      showToast('Confira o nome, a descrição, o valor e a data combinada.', 'erro');
+      return;
+    }
+    const debt = { id: makeId(), name, description, amount, dueDate, status: 'pendente' };
+    if (!saveData({ ...data, debtors: [...data.debtors, debt] })) {
+      return;
+    }
+    elements.debtorForm.reset();
+    elements.debtorForm.elements.vencimento.value = todayString();
+    renderDebtors();
+    showToast('Devedor anotado.');
+  });
+
   elements.salesBody.addEventListener('click', (event) => {
     const button = event.target.closest('button[data-action]');
     if (!button) {
@@ -498,6 +588,25 @@
     showToast('Lembrete removido.');
   });
 
+  elements.debtorsBody.addEventListener('click', (event) => {
+    const button = event.target.closest('button[data-action]');
+    if (!button) {
+      return;
+    }
+    const debt = data.debtors.find((item) => item.id === button.dataset.id);
+    if (!debt) {
+      return;
+    }
+    const debtors = button.dataset.action === 'paid'
+      ? data.debtors.map((item) => item.id === debt.id ? { ...item, status: 'pago', paidAt: todayString() } : item)
+      : data.debtors.filter((item) => item.id !== debt.id);
+    if (!saveData({ ...data, debtors })) {
+      return;
+    }
+    renderDebtors();
+    showToast(button.dataset.action === 'paid' ? 'Dívida marcada como paga.' : 'Registro devedor excluído.');
+  });
+
   function todayString() {
     const now = new Date();
     const year = now.getFullYear();
@@ -508,6 +617,7 @@
 
   elements.saleForm.elements.data.value = todayString();
   elements.expenseForm.elements.data.value = todayString();
+  elements.debtorForm.elements.vencimento.value = todayString();
   document.querySelectorAll('[data-view-panel]').forEach((panel) => {
     panel.hidden = panel.dataset.viewPanel !== 'resumo';
   });

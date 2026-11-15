@@ -171,6 +171,14 @@ h2 {
   grid-template-columns: 1fr 1fr auto;
 }
 
+.form-grid.debtor-form {
+  grid-template-columns: 1fr 1.4fr 0.8fr 1fr auto;
+}
+
+.debtor-summary {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .period-field {
   width: min(220px, 100%);
 }
@@ -402,8 +410,89 @@ tbody tr:last-child td {
   display: grid;
   min-height: 100vh;
   place-items: center;
-  padding: 24px;
+  padding: 40px 24px;
   background: var(--gold-dark);
+}
+
+.login-layout {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.85fr) minmax(320px, 420px);
+  align-items: center;
+  gap: clamp(24px, 6vw, 76px);
+  width: min(940px, 100%);
+}
+
+.login-art {
+  display: grid;
+  justify-items: center;
+  color: var(--gold-soft);
+  text-align: center;
+}
+
+.jewel-illustration {
+  width: min(280px, 100%);
+  overflow: visible;
+}
+
+.jewel-halo {
+  fill: rgba(242, 226, 182, 0.06);
+  stroke: rgba(242, 226, 182, 0.18);
+  stroke-width: 1.5;
+}
+
+.jewel-band-shadow {
+  fill: none;
+  stroke: #8d5b39;
+  stroke-linecap: round;
+  stroke-width: 17;
+}
+
+.jewel-band {
+  fill: none;
+  stroke: #d7ae69;
+  stroke-linecap: round;
+  stroke-width: 11;
+}
+
+.jewel-band-light {
+  fill: none;
+  stroke: #fae7bd;
+  stroke-linecap: round;
+  stroke-width: 2;
+}
+
+.jewel-setting {
+  fill: #d7ae69;
+  stroke: #fae7bd;
+  stroke-linejoin: round;
+  stroke-width: 2;
+}
+
+.jewel-stone {
+  fill: #d98caa;
+  stroke: #ffe4ed;
+  stroke-linejoin: round;
+  stroke-width: 2;
+}
+
+.jewel-stone-shine {
+  fill: #f5bfd0;
+  opacity: 0.9;
+}
+
+.jewel-sparkle {
+  fill: none;
+  stroke: #fae7bd;
+  stroke-linecap: round;
+  stroke-width: 2;
+}
+
+.login-art-caption {
+  margin: -5px 0 0;
+  color: #ead9ae;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 23px;
+  line-height: 1.2;
 }
 
 .login-box {
@@ -418,6 +507,20 @@ tbody tr:last-child td {
   display: inline-block;
   margin-bottom: 22px;
   color: var(--gold-dark);
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 30px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.demo-notice {
+  margin: 14px 0;
+  padding: 10px 12px;
+  border: 1px solid #ddc887;
+  border-radius: 6px;
+  background: #fbf5e5;
+  color: var(--gold-dark);
+  font-size: 13px;
 }
 
 .login-box .field {
@@ -474,6 +577,28 @@ tbody tr:last-child td {
     padding: 8px 10px;
   }
 
+  .login-layout {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    max-width: 420px;
+  }
+
+  .login-art {
+    grid-template-columns: 100px 1fr;
+    justify-items: start;
+    gap: 12px;
+    text-align: left;
+  }
+
+  .jewel-illustration {
+    width: 100px;
+  }
+
+  .login-art-caption {
+    margin: 0;
+    font-size: 20px;
+  }
+
   .container {
     width: min(100% - 28px, 1120px);
     padding-top: 27px;
@@ -488,7 +613,8 @@ tbody tr:last-child td {
   .form-grid.orders-form,
   .form-grid.sale-form,
   .form-grid.expense-form,
-  .form-grid.shopping-form {
+  .form-grid.shopping-form,
+  .form-grid.debtor-form {
     grid-template-columns: 1fr;
   }
 

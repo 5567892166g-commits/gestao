@@ -21,13 +21,14 @@ As próximas atualizações na branch `main` serão publicadas automaticamente.
 
 1. Abra esta pasta no VS Code.
 2. Abra `index.html` e clique em **Go Live** na barra inferior. Se o Live Server não estiver instalado, instale a extensão Live Server.
-3. O navegador abrirá o app. O login inicial é usuário `admin` e senha `admin123`.
+3. Na demonstração, informe qualquer e-mail válido e uma senha de 8 números para entrar.
 
 ## Como usar
 
 - **Resumo:** veja vendido, recebido, a receber, saídas e saldo recebido nesta semana, neste mês ou neste ano. O app também organiza os valores por dia da semana e por mês.
 - **Vendas e recebimentos:** anote o que vendeu, para quem, valor, data e se já recebeu. Use **Marcar recebido** quando a pessoa pagar; o recebimento entra no balanço na data em que for marcado.
+- **Devedores:** anote quem deve, o motivo, o valor e a data combinada. Os registros podem ser marcados como pagos; valores vencidos são destacados. Esta lista é separada das vendas para evitar somar a mesma dívida duas vezes.
 - **Saídas:** anote compras e outros gastos para acompanhar o saldo.
 - **Lista de compras:** registre lembretes do que precisa comprar novamente. Essa lista não representa estoque.
 
-Os dados ficam salvos no armazenamento local do navegador e não são sincronizados entre aparelhos ou pessoas. A publicação torna o site acessível por um link, mas não cria um banco de dados compartilhado. O login `admin` / `admin123` é apenas uma barreira visual, não protege informações e não deve ser usado para controlar acesso a dados reais. Para compartilhar vendas e recebimentos com segurança entre pessoas, será necessário adicionar um servidor, banco de dados e autenticação real.
+Os dados ficam salvos no armazenamento local do navegador e não são sincronizados entre aparelhos ou pessoas. A publicação torna o site acessível por um link, mas não cria um banco de dados compartilhado. O login aceita qualquer e-mail válido e qualquer senha numérica de 8 dígitos; ele é apenas uma entrada demonstrativa, não protege informações. Não use dados financeiros ou pessoais reais. Para compartilhar informações com segurança entre pessoas, será necessário adicionar um servidor, banco de dados e autenticação real.
