@@ -46,11 +46,37 @@ a {
 }
 
 .brand {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
   color: var(--gold-soft);
-  font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: 27px;
-  font-weight: 700;
+  line-height: 1;
   text-decoration: none;
+}
+
+.brand-kicker {
+  margin-bottom: 5px;
+  font-family: 'Montserrat', 'Segoe UI', sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.brand-kicker::after {
+  display: block;
+  width: 28px;
+  height: 1px;
+  margin-top: 5px;
+  background: currentColor;
+  content: "";
+  opacity: 0.65;
+}
+
+.brand-name {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 29px;
+  font-weight: 700;
 }
 
 .navigation {
@@ -504,13 +530,16 @@ tbody tr:last-child td {
 }
 
 .login-box .brand {
-  display: inline-block;
   margin-bottom: 22px;
   color: var(--gold-dark);
-  font-family: 'Cormorant Garamond', Georgia, serif;
-  font-size: 30px;
-  font-weight: 700;
-  text-decoration: none;
+}
+
+.login-box .brand-kicker {
+  font-size: 11px;
+}
+
+.login-box .brand-name {
+  font-size: 36px;
 }
 
 .demo-notice {
