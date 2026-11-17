@@ -1,16 +1,16 @@
 :root {
   color-scheme: light;
-  --paper: #f5f4ed;
-  --surface: #fffefa;
-  --ink: #29251d;
-  --muted: #716b60;
-  --line: #dfd9cb;
-  --gold: #b8860b;
-  --gold-dark: #4a3608;
-  --gold-soft: #f2e2b6;
-  --orange: #d36b3f;
-  --red: #a63d38;
-  --radius: 8px;
+  --paper: #faf6f5;
+  --surface: #fffdfb;
+  --ink: #332c31;
+  --muted: #746970;
+  --line: #e8dde1;
+  --gold: #c69a67;
+  --gold-dark: #644951;
+  --gold-soft: #f3e5d6;
+  --orange: #c97f8b;
+  --red: #a64f5c;
+  --radius: 12px;
 }
 
 * {
@@ -77,6 +77,24 @@ a {
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 29px;
   font-weight: 700;
+}
+
+.brand-initial {
+  position: relative;
+  display: inline-block;
+  padding-left: 22px;
+}
+
+.brand-ring {
+  position: absolute;
+  top: -9px;
+  left: 0;
+  width: 22px;
+  height: 31px;
+  overflow: visible;
+  pointer-events: none;
+  transform: rotate(-14deg);
+  transform-origin: 50% 0;
 }
 
 .navigation {
@@ -238,8 +256,8 @@ h2 {
 }
 
 .summary-card.highlight {
-  border-color: #ddc887;
-  background: #fbf5e5;
+  border-color: #e6cdd3;
+  background: #fbf2f4;
 }
 
 .field {
@@ -260,7 +278,7 @@ select {
   min-height: 44px;
   padding: 10px 12px;
   border: 1px solid var(--line);
-  border-radius: 6px;
+  border-radius: 9px;
   background: #fff;
   color: var(--ink);
   font: inherit;
@@ -280,7 +298,7 @@ button,
   min-height: 42px;
   padding: 9px 15px;
   border: 0;
-  border-radius: 6px;
+  border-radius: 9px;
   background: var(--gold);
   color: #211b0d;
   font: inherit;
@@ -377,7 +395,7 @@ tbody tr:last-child td {
   gap: 16px;
   padding: 12px;
   border: 1px solid var(--line);
-  border-radius: 6px;
+  border-radius: 9px;
 }
 
 .shopping-item label {
@@ -418,7 +436,7 @@ tbody tr:last-child td {
   margin: 18px auto 0;
   padding: 12px 15px;
   border: 1px solid var(--line);
-  border-radius: 6px;
+  border-radius: 9px;
   background: var(--surface);
 }
 
@@ -545,33 +563,15 @@ tbody tr:last-child td {
 .demo-notice {
   margin: 14px 0;
   padding: 10px 12px;
-  border: 1px solid #ddc887;
-  border-radius: 6px;
-  background: #fbf5e5;
+  border: 1px solid #e6cdd3;
+  border-radius: 9px;
+  background: #fbf2f4;
   color: var(--gold-dark);
   font-size: 13px;
 }
 
 .login-box .field {
   margin: 16px 0;
-}
-
-.password-control {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 100px;
-  align-items: center;
-  gap: 8px;
-}
-
-.login-box .password-toggle {
-  width: auto;
-  min-width: 90px;
-  margin: 0;
-  padding: 8px 10px;
-}
-
-.password-toggle:hover {
-  border-color: var(--gold);
 }
 
 .login-message {

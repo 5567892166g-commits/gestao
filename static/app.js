@@ -14,7 +14,6 @@
     loginForm: document.querySelector('#loginForm'),
     loginMessage: document.querySelector('#loginMessage'),
     passwordInput: document.querySelector('#password'),
-    togglePassword: document.querySelector('#togglePassword'),
     appShell: document.querySelector('#appShell'),
     toast: document.querySelector('#toast'),
     logoutButton: document.querySelector('#logoutButton'),
@@ -395,14 +394,6 @@
     renderDebtors();
   }
 
-  elements.togglePassword.addEventListener('click', () => {
-    const showPassword = elements.passwordInput.type === 'password';
-    elements.passwordInput.type = showPassword ? 'text' : 'password';
-    elements.togglePassword.textContent = showPassword ? 'Ocultar' : 'Mostrar';
-    elements.togglePassword.setAttribute('aria-label', `${showPassword ? 'Ocultar' : 'Mostrar'} senha`);
-    elements.togglePassword.setAttribute('aria-pressed', String(showPassword));
-  });
-
   elements.loginForm.addEventListener('submit', (event) => {
     event.preventDefault();
     const formData = new FormData(elements.loginForm);
@@ -419,9 +410,6 @@
     elements.loginMessage.hidden = true;
     elements.loginForm.reset();
     elements.passwordInput.type = 'password';
-    elements.togglePassword.textContent = 'Mostrar';
-    elements.togglePassword.setAttribute('aria-label', 'Mostrar senha');
-    elements.togglePassword.setAttribute('aria-pressed', 'false');
     setAuthenticated(true);
   });
 

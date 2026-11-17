@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#4a3608">
-  <title>Tabata Christ | Gestão financeira</title>
+  <meta name="theme-color" content="#644951">
+  <title>Tabata Christy | Gestão financeira</title>
   <link rel="stylesheet" href="static/estilo.css">
   <script src="static/app.js" defer></script>
 </head>
@@ -29,7 +29,14 @@
       <section class="login-box" aria-labelledby="loginTitle">
         <a class="brand" href="index.html">
           <span class="brand-kicker">Acesso administrativo</span>
-          <span class="brand-name">Tabata Christ</span>
+          <span class="brand-name"><span class="brand-initial">T<svg class="brand-ring" viewBox="0 0 24 34" aria-hidden="true" focusable="false">
+              <path d="M24 0h-12v7" fill="none" stroke="#c69a67" stroke-linecap="round" stroke-width="1.2"></path>
+              <ellipse cx="12" cy="23" rx="7" ry="9" fill="none" stroke="#c69a67" stroke-width="2.2"></ellipse>
+              <path d="m12 6 5 5-5 5-5-5z" fill="#fffefa" stroke="#c69a67" stroke-width="1"></path>
+              <path d="m12 6 2 5-2 5-2-5z" fill="#fff" opacity="0.9"></path>
+              <path d="M7 11h10m-5-5-2 5 2 5 2-5z" fill="none" stroke="#e8c1ce" stroke-width="0.8"></path>
+              <path d="m4 8 1 1m14-1 1 1M12 4V2.5" fill="none" stroke="#fff8e9" stroke-linecap="round" stroke-width="1"></path>
+            </svg></span>abata Christy</span>
         </a>
         <h1 id="loginTitle">Boas-vindas</h1>
         <p class="demo-notice">Demonstração pública: qualquer pessoa pode entrar com um e-mail válido e uma senha de 8 números. Não use dados reais.</p>
@@ -41,10 +48,7 @@
           </div>
           <div class="field">
             <label for="password">Senha de 8 números</label>
-            <div class="password-control">
-              <input id="password" name="senha" type="password" inputmode="numeric" autocomplete="current-password" pattern="[0-9]{8}" minlength="8" maxlength="8" placeholder="••••••••" required>
-              <button id="togglePassword" class="secondary password-toggle" type="button" aria-controls="password" aria-label="Mostrar senha" aria-pressed="false">Mostrar</button>
-            </div>
+            <input id="password" name="senha" type="password" inputmode="numeric" autocomplete="current-password" pattern="[0-9]{8}" minlength="8" maxlength="8" placeholder="••••••••" required>
           </div>
           <button type="submit">Entrar</button>
         </form>
@@ -56,10 +60,18 @@
     <header class="topbar">
       <a class="brand" href="index.html">
         <span class="brand-kicker">Acesso administrativo</span>
-        <span class="brand-name">Tabata Christ</span>
+        <span class="brand-name"><span class="brand-initial">T<svg class="brand-ring" viewBox="0 0 24 34" aria-hidden="true" focusable="false">
+            <path d="M24 0h-12v7" fill="none" stroke="#c69a67" stroke-linecap="round" stroke-width="1.2"></path>
+            <ellipse cx="12" cy="23" rx="7" ry="9" fill="none" stroke="#c69a67" stroke-width="2.2"></ellipse>
+            <path d="m12 6 5 5-5 5-5-5z" fill="#fffefa" stroke="#c69a67" stroke-width="1"></path>
+            <path d="m12 6 2 5-2 5-2-5z" fill="#fff" opacity="0.9"></path>
+            <path d="M7 11h10m-5-5-2 5 2 5 2-5z" fill="none" stroke="#e8c1ce" stroke-width="0.8"></path>
+            <path d="m4 8 1 1m14-1 1 1M12 4V2.5" fill="none" stroke="#fff8e9" stroke-linecap="round" stroke-width="1"></path>
+          </svg></span>abata Christy</span>
       </a>
       <nav class="navigation" aria-label="Navegação principal">
         <button type="button" class="active" data-view="resumo" aria-current="page">Resumo</button>
+        <button type="button" data-view="balancos">Resumo e balanço</button>
         <button type="button" data-view="vendas">Vendas e recebimentos</button>
         <button type="button" data-view="devedores">Devedores</button>
         <button type="button" data-view="despesas">Saídas</button>
@@ -77,14 +89,6 @@
             <p class="eyebrow">Entradas, recebimentos e saídas</p>
             <h1 id="summaryTitle">Resumo financeiro</h1>
           </div>
-          <div class="field period-field">
-            <label for="summaryPeriod">Período do resumo</label>
-            <select id="summaryPeriod">
-              <option value="week">Esta semana</option>
-              <option value="month">Este mês</option>
-              <option value="year">Este ano</option>
-            </select>
-          </div>
         </div>
 
         <section class="summary-grid" aria-label="Totais do período">
@@ -94,7 +98,23 @@
           <article class="summary-card"><span>Saídas</span><strong id="totalExpenses">R$ 0,00</strong></article>
           <article class="summary-card highlight"><span>Saldo recebido</span><strong id="totalBalance">R$ 0,00</strong></article>
         </section>
+      </section>
 
+      <section class="view" data-view-panel="balancos" aria-labelledby="balancesTitle" hidden>
+        <div class="page-heading">
+          <div>
+            <p class="eyebrow">Acompanhe os resultados por dia e por mês</p>
+            <h1 id="balancesTitle">Resumo e balanço</h1>
+          </div>
+          <div class="field period-field">
+            <label for="summaryPeriod">Período do resumo diário</label>
+            <select id="summaryPeriod">
+              <option value="week">Esta semana</option>
+              <option value="month">Este mês</option>
+              <option value="year">Este ano</option>
+            </select>
+          </div>
+        </div>
         <section class="panel" aria-labelledby="weekdayTitle">
           <h2 class="section-heading" id="weekdayTitle">Resumo por dia da semana</h2>
           <div class="table-wrap">
