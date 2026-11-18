@@ -4,7 +4,7 @@ Aplicação estática para anotar vendas, valores a receber, saídas e itens que
 
 ## Publicar no Firebase Hosting
 
-1. No [Firebase Console](https://console.firebase.google.com/), abra o projeto `gestao-1b9fa` e crie um app Web (`</>`). Copie a configuração do SDK para `static/firebase-config.js`; os campos `apiKey` e `appId` não são senhas, mas mantenha chaves de conta de serviço fora do site e do Git.
+1. O projeto `gestao-1b9fa` e o app Web já estão registrados, e a configuração pública do SDK está em `static/firebase-config.js`. Não coloque senhas nem chaves de conta de serviço nesse arquivo.
 2. Em **Authentication → Sign-in method**, habilite **E-mail/senha**. Em **Authentication → Users**, adicione a conta da Tabata e copie o UID dessa conta.
 3. Crie o banco em **Firestore Database**, escolha **Production mode** e a região `southamerica-east1` (São Paulo). No arquivo `firestore.rules`, substitua `PREENCHA_COM_O_UID_DA_TABATA` pelo UID copiado.
 4. Instale o [Node.js LTS](https://nodejs.org/) se ainda não estiver instalado.
