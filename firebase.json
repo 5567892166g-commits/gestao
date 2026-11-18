@@ -1,4 +1,7 @@
 {
+  "firestore": {
+    "rules": "firestore.rules"
+  },
   "hosting": {
     "public": ".",
     "ignore": [
@@ -11,6 +14,7 @@
       "**/*.pyc",
       "**/*.db",
       "README.md",
+      "firestore.rules",
       "templates/**",
       ".github/**",
       ".vscode/**"

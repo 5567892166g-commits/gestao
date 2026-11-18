@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#644951">
   <title>Tabata Christy | Gestão financeira</title>
-  <link rel="stylesheet" href="static/estilo.css?v=aadc70a">
-  <script src="static/app.js" defer></script>
+  <link rel="stylesheet" href="static/estilo.css?v=3aabae1">
+  <script type="module" src="static/app.js"></script>
 </head>
 <body>
   <main id="loginView" class="login-page">
@@ -39,7 +39,7 @@
             </svg></span>abata Christy</span>
         </a>
         <h1 id="loginTitle">Boas-vindas</h1>
-        <p class="demo-notice">Demonstração pública: qualquer pessoa pode entrar com um e-mail válido e uma senha de 8 números. Não use dados reais.</p>
+        <p class="demo-notice">Acesso privado da Tabata. Os lançamentos ficam sincronizados entre os aparelhos autorizados.</p>
         <p id="loginMessage" class="login-message" role="alert" hidden></p>
         <form id="loginForm">
           <div class="field">
@@ -47,8 +47,8 @@
             <input id="email" name="email" type="email" autocomplete="email" placeholder="voce@email.com" required>
           </div>
           <div class="field">
-            <label for="password">Senha de 8 números</label>
-            <input id="password" name="senha" type="password" inputmode="numeric" autocomplete="current-password" pattern="[0-9]{8}" minlength="8" maxlength="8" placeholder="••••••••" required>
+            <label for="password">Senha da conta</label>
+            <input id="password" name="senha" type="password" autocomplete="current-password" minlength="6" placeholder="Sua senha" required>
           </div>
           <button type="submit">Entrar</button>
         </form>

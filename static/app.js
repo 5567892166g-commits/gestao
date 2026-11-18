@@ -1,6 +1,16 @@
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js';
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js';
+import {
+  collection,
+  doc,
+  getFirestore,
+  onSnapshot,
+  writeBatch,
+} from 'https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js';
+import { firebaseConfig } from './firebase-config.js';
+
 (() => {
-  const DATA_KEY = 'gestao.data.v1';
-  const AUTH_KEY = 'gestao.authenticated';
+  const dataCollections = ['sales', 'expenses', 'shopping', 'debtors'];
   const currency = new Intl.NumberFormat('pt-BR', {
     style: 'currency',
     currency: 'BRL',
@@ -47,33 +57,96 @@
     debtorCount: document.querySelector('#debtorCount'),
   };
 
-  let data = loadData();
+  let data = emptyData();
+  let currentUser = null;
+  let auth = null;
+  let db = null;
+  let stopDataSync = () => {};
   let toastTimer;
 
-  function loadData() {
+  function emptyData() {
+    return { sales: [], expenses: [], shopping: [], debtors: [] };
+  }
+
+  function watchData(user) {
+    stopDataSync();
+    const loadedCollections = new Set();
+    let initialLoadComplete = false;
+    const unsubscribe = dataCollections.map((name) => onSnapshot(
+      collection(db, 'users', user.uid, name),
+      (snapshot) => {
+        if (currentUser?.uid !== user.uid) {
+          return;
+        }
+        data[name] = snapshot.docs.map((record) => ({ ...record.data(), id: record.id }));
+        loadedCollections.add(name);
+        if (!initialLoadComplete && loadedCollections.size === dataCollections.length) {
+          initialLoadComplete = true;
+          elements.loginMessage.hidden = true;
+          setAuthenticated(true);
+        } else if (initialLoadComplete) {
+          renderAll();
+        }
+      },
+      (error) => {
+        if (currentUser?.uid !== user.uid) {
+          return;
+        }
+        setAuthenticated(false);
+        elements.loginMessage.textContent = getFirebaseErrorMessage(error);
+        elements.loginMessage.hidden = false;
+      },
+    ));
+    stopDataSync = () => unsubscribe.forEach((stop) => stop());
+  }
+
+  async function saveData(nextData) {
+    if (!db || !currentUser) {
+      showToast('Entre na conta autorizada antes de salvar.', 'erro');
+      return false;
+    }
+
     try {
-      const saved = JSON.parse(localStorage.getItem(DATA_KEY) || '{}');
-      return {
-        ...saved,
-        sales: Array.isArray(saved.sales) ? saved.sales : [],
-        expenses: Array.isArray(saved.expenses) ? saved.expenses : [],
-        shopping: Array.isArray(saved.shopping) ? saved.shopping : [],
-        debtors: Array.isArray(saved.debtors) ? saved.debtors : [],
-      };
-    } catch {
-      return { sales: [], expenses: [], shopping: [], debtors: [] };
+      const batch = writeBatch(db);
+      for (const name of dataCollections) {
+        const previousRecords = new Map(data[name].map((record) => [record.id, record]));
+        const nextRecords = new Map(nextData[name].map((record) => [record.id, record]));
+
+        for (const [id, record] of nextRecords) {
+          if (!previousRecords.has(id) || JSON.stringify(previousRecords.get(id)) !== JSON.stringify(record)) {
+            batch.set(doc(db, 'users', currentUser.uid, name, id), record);
+          }
+        }
+        for (const id of previousRecords.keys()) {
+          if (!nextRecords.has(id)) {
+            batch.delete(doc(db, 'users', currentUser.uid, name, id));
+          }
+        }
+      }
+
+      await batch.commit();
+      data = nextData;
+      return true;
+    } catch (error) {
+      showToast(getFirebaseErrorMessage(error), 'erro');
+      return false;
     }
   }
 
-  function saveData(nextData) {
-    try {
-      localStorage.setItem(DATA_KEY, JSON.stringify(nextData));
-      data = nextData;
-      return true;
-    } catch {
-      showToast('Não foi possível salvar os dados neste navegador.', 'erro');
-      return false;
+  function getFirebaseErrorMessage(error) {
+    const messages = {
+      'auth/invalid-credential': 'E-mail ou senha incorretos.',
+      'auth/invalid-login-credentials': 'E-mail ou senha incorretos.',
+      'auth/user-disabled': 'Esta conta está desativada. Fale com quem administra o Firebase.',
+      'auth/too-many-requests': 'Muitas tentativas. Aguarde um pouco e tente novamente.',
+      'auth/network-request-failed': 'Sem conexão com o Firebase. Verifique a internet e tente novamente.',
+      'permission-denied': 'O Firestore bloqueou o acesso. Confira o UID autorizado em firestore.rules.',
+      unavailable: 'O Firebase está temporariamente indisponível. Tente novamente.',
+    };
+    if (!messages[error.code]) {
+      console.error('Falha ao comunicar com o Firebase.', error);
     }
+    return messages[error.code] || 'Não foi possível comunicar com o Firebase. Tente novamente.';
   }
 
   function showToast(message, category = 'ok') {
@@ -92,6 +165,37 @@
     if (authenticated) {
       renderAll();
     }
+  }
+
+  function startFirebase() {
+    const missingConfig = ['apiKey', 'authDomain', 'projectId', 'appId'].some((key) =>
+      !firebaseConfig[key] || firebaseConfig[key].startsWith('PREENCHA_'),
+    );
+    if (missingConfig) {
+      elements.loginMessage.textContent = 'Configure os dados do app Web em static/firebase-config.js antes de entrar.';
+      elements.loginMessage.hidden = false;
+      return;
+    }
+
+    const app = initializeApp(firebaseConfig);
+    auth = getAuth(app);
+    db = getFirestore(app);
+    onAuthStateChanged(auth, (user) => {
+      currentUser = user;
+      if (!user) {
+        stopDataSync();
+        data = emptyData();
+        setAuthenticated(false);
+        return;
+      }
+
+      data = emptyData();
+      setAuthenticated(false);
+      watchData(user);
+    }, (error) => {
+      elements.loginMessage.textContent = getFirebaseErrorMessage(error);
+      elements.loginMessage.hidden = false;
+    });
   }
 
   function makeId() {
@@ -394,28 +498,43 @@
     renderDebtors();
   }
 
-  elements.loginForm.addEventListener('submit', (event) => {
+  elements.loginForm.addEventListener('submit', async (event) => {
     event.preventDefault();
-    const formData = new FormData(elements.loginForm);
-    const email = String(formData.get('email') || '').trim();
-    const password = String(formData.get('senha') || '');
-
-    if (!email || !/^[0-9]{8}$/.test(password)) {
-      elements.loginMessage.textContent = 'Informe um e-mail válido e uma senha de 8 números.';
+    if (!auth) {
+      elements.loginMessage.textContent = 'Configure o Firebase antes de entrar.';
       elements.loginMessage.hidden = false;
       return;
     }
 
-    sessionStorage.setItem(AUTH_KEY, 'true');
-    elements.loginMessage.hidden = true;
-    elements.loginForm.reset();
-    elements.passwordInput.type = 'password';
-    setAuthenticated(true);
+    const formData = new FormData(elements.loginForm);
+    const email = String(formData.get('email') || '').trim();
+    const password = String(formData.get('senha') || '');
+
+    if (!email || password.length < 6) {
+      elements.loginMessage.textContent = 'Informe um e-mail válido e a senha da conta.';
+      elements.loginMessage.hidden = false;
+      return;
+    }
+
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      elements.loginForm.reset();
+      elements.loginMessage.hidden = true;
+    } catch (error) {
+      elements.loginMessage.textContent = getFirebaseErrorMessage(error);
+      elements.loginMessage.hidden = false;
+    }
   });
 
-  elements.logoutButton.addEventListener('click', () => {
-    sessionStorage.removeItem(AUTH_KEY);
-    setAuthenticated(false);
+  elements.logoutButton.addEventListener('click', async () => {
+    if (!auth) {
+      return;
+    }
+    try {
+      await signOut(auth);
+    } catch (error) {
+      showToast(getFirebaseErrorMessage(error), 'erro');
+    }
   });
 
   document.querySelectorAll('[data-view]').forEach((button) => {
@@ -437,7 +556,7 @@
 
   elements.summaryPeriod.addEventListener('change', renderSummary);
 
-  elements.saleForm.addEventListener('submit', (event) => {
+  elements.saleForm.addEventListener('submit', async (event) => {
     event.preventDefault();
     const formData = new FormData(elements.saleForm);
     const item = String(formData.get('item') || '').trim();
@@ -450,7 +569,7 @@
       return;
     }
     const sale = { id: makeId(), item, buyer, amount, date, status, receivedAt: status === 'recebido' ? date : null };
-    if (!saveData({ ...data, sales: [...data.sales, sale] })) {
+    if (!await saveData({ ...data, sales: [...data.sales, sale] })) {
       return;
     }
     elements.saleForm.reset();
@@ -459,7 +578,7 @@
     showToast('Venda anotada.');
   });
 
-  elements.expenseForm.addEventListener('submit', (event) => {
+  elements.expenseForm.addEventListener('submit', async (event) => {
     event.preventDefault();
     const formData = new FormData(elements.expenseForm);
     const description = String(formData.get('descricao') || '').trim();
@@ -470,7 +589,7 @@
       return;
     }
     const expense = { id: makeId(), description, amount, date };
-    if (!saveData({ ...data, expenses: [...data.expenses, expense] })) {
+    if (!await saveData({ ...data, expenses: [...data.expenses, expense] })) {
       return;
     }
     elements.expenseForm.reset();
@@ -479,7 +598,7 @@
     showToast('Saída anotada.');
   });
 
-  elements.shoppingForm.addEventListener('submit', (event) => {
+  elements.shoppingForm.addEventListener('submit', async (event) => {
     event.preventDefault();
     const formData = new FormData(elements.shoppingForm);
     const item = String(formData.get('item') || '').trim();
@@ -489,7 +608,7 @@
       return;
     }
     const shoppingItem = { id: makeId(), item, note, done: false };
-    if (!saveData({ ...data, shopping: [...data.shopping, shoppingItem] })) {
+    if (!await saveData({ ...data, shopping: [...data.shopping, shoppingItem] })) {
       return;
     }
     elements.shoppingForm.reset();
@@ -497,7 +616,7 @@
     showToast('Item adicionado à lista.');
   });
 
-  elements.debtorForm.addEventListener('submit', (event) => {
+  elements.debtorForm.addEventListener('submit', async (event) => {
     event.preventDefault();
     const formData = new FormData(elements.debtorForm);
     const name = String(formData.get('nome') || '').trim();
@@ -509,7 +628,7 @@
       return;
     }
     const debt = { id: makeId(), name, description, amount, dueDate, status: 'pendente' };
-    if (!saveData({ ...data, debtors: [...data.debtors, debt] })) {
+    if (!await saveData({ ...data, debtors: [...data.debtors, debt] })) {
       return;
     }
     elements.debtorForm.reset();
@@ -518,7 +637,7 @@
     showToast('Devedor anotado.');
   });
 
-  elements.salesBody.addEventListener('click', (event) => {
+  elements.salesBody.addEventListener('click', async (event) => {
     const button = event.target.closest('button[data-action]');
     if (!button) {
       return;
@@ -530,27 +649,27 @@
     const sales = button.dataset.action === 'receive'
       ? data.sales.map((item) => item.id === sale.id ? { ...item, status: 'recebido', receivedAt: todayString() } : item)
       : data.sales.filter((item) => item.id !== sale.id);
-    if (!saveData({ ...data, sales })) {
+    if (!await saveData({ ...data, sales })) {
       return;
     }
     renderAll();
     showToast(button.dataset.action === 'receive' ? 'Venda marcada como recebida.' : 'Venda excluída.');
   });
 
-  elements.expensesBody.addEventListener('click', (event) => {
+  elements.expensesBody.addEventListener('click', async (event) => {
     const button = event.target.closest('button[data-action="delete"]');
     if (!button) {
       return;
     }
     const expenses = data.expenses.filter((item) => item.id !== button.dataset.id);
-    if (!saveData({ ...data, expenses })) {
+    if (!await saveData({ ...data, expenses })) {
       return;
     }
     renderAll();
     showToast('Saída excluída.');
   });
 
-  elements.shoppingList.addEventListener('change', (event) => {
+  elements.shoppingList.addEventListener('change', async (event) => {
     const checkbox = event.target.closest('input[data-action="toggle"]');
     if (!checkbox) {
       return;
@@ -558,25 +677,25 @@
     const shopping = data.shopping.map((item) =>
       item.id === checkbox.dataset.id ? { ...item, done: checkbox.checked } : item,
     );
-    if (saveData({ ...data, shopping })) {
+    if (await saveData({ ...data, shopping })) {
       renderShopping();
     }
   });
 
-  elements.shoppingList.addEventListener('click', (event) => {
+  elements.shoppingList.addEventListener('click', async (event) => {
     const button = event.target.closest('button[data-action="delete"]');
     if (!button) {
       return;
     }
     const shopping = data.shopping.filter((item) => item.id !== button.dataset.id);
-    if (!saveData({ ...data, shopping })) {
+    if (!await saveData({ ...data, shopping })) {
       return;
     }
     renderShopping();
     showToast('Lembrete removido.');
   });
 
-  elements.debtorsBody.addEventListener('click', (event) => {
+  elements.debtorsBody.addEventListener('click', async (event) => {
     const button = event.target.closest('button[data-action]');
     if (!button) {
       return;
@@ -588,7 +707,7 @@
     const debtors = button.dataset.action === 'paid'
       ? data.debtors.map((item) => item.id === debt.id ? { ...item, status: 'pago', paidAt: todayString() } : item)
       : data.debtors.filter((item) => item.id !== debt.id);
-    if (!saveData({ ...data, debtors })) {
+    if (!await saveData({ ...data, debtors })) {
       return;
     }
     renderDebtors();
@@ -609,5 +728,5 @@
   document.querySelectorAll('[data-view-panel]').forEach((panel) => {
     panel.hidden = panel.dataset.viewPanel !== 'resumo';
   });
-  setAuthenticated(sessionStorage.getItem(AUTH_KEY) === 'true');
+  startFirebase();
 })();
